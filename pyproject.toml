@@ -1,0 +1,12 @@
+[project]
+name = "aip-servers"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "aip-agent>=0.1.4",
+]
+
+[tool.uv.sources]
+aip-agent = { git = "https://github.com/unibaseio/aip-agent.git" }
