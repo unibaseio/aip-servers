@@ -12,42 +12,42 @@ from aip_agent.agents.tool_agent import ToolAgentWrapper
 
 from membase.chain.chain import membase_id
 
-from beeper_server.beeper_chain.beeper import Beeper
-from beeper_server.beeper_chain.config import BSC_TESTNET_SETTINGS
+from membase.chain.beeper import BeeperClient
+from membase.chain.util import BSC_TESTNET_SETTINGS
 
 wallet_address = os.getenv('MEMBASE_ACCOUNT')
 private_key = os.getenv('MEMBASE_PRIVATE_KEY')
 
-beeper_client = Beeper(config=BSC_TESTNET_SETTINGS, admin_wallet_address=wallet_address, admin_private_key=private_key)
+beeper_client = BeeperClient(config=BSC_TESTNET_SETTINGS, wallet_address=wallet_address, private_key=private_key)
 
 from mcp.server.fastmcp import FastMCP, Context
 
 mcp = FastMCP("mcp-beeper-tool")
 
 @mcp.tool()
-async def get_bnb_balance(account_address: str, ctx: Context = None) -> str:
+async def get_bnb_balance(wallet_address: str, ctx: Context = None) -> str:
     """get the bnb balance of the account"""
-    return beeper_client.get_balance(account_address)
+    return beeper_client.get_balance(wallet_address)
     
 @mcp.tool()
-async def get_token_balance(account_address: str, token_address: str, ctx: Context = None) -> str:
+async def get_token_balance(wallet_address: str, token_address: str, ctx: Context = None) -> str:
     """get the token balance of the account"""
-    return beeper_client.get_token_balance(account_address, token_address)
+    return beeper_client.get_balance(wallet_address, token_address)
 
 @mcp.tool()
-async def trade_token(from_token_address: str, to_token_address: str, amount: int, ctx: Context = None) -> str:
-    """trade the token from from_token_address to to_token_address with the amount"""
-    return beeper_client.make_trade(beeper_client.admin_wallet, beeper_client.admin_private, from_token_address, to_token_address, amount)
+async def trade_token(input_token_address: str, output_token_address: str, amount: int, ctx: Context = None) -> str:
+    """trade the token from input_token_address to output_token_address with the amount"""
+    return beeper_client.make_trade(input_token_address, output_token_address, amount)
 
 @mcp.tool()
-async def transfer_bnb(to_account_address: str, amount: int, ctx: Context = None) -> str:
-    """transfer the bnb from account to the to_account_address with the amount"""
-    return beeper_client.transfer_asset(beeper_client.admin_wallet, beeper_client.admin_private, to_account_address, "", amount)
+async def transfer_bnb(to_wallet_address: str, amount: int, ctx: Context = None) -> str:
+    """transfer the bnb to the to_wallet_address with the amount"""
+    return beeper_client.transfer_asset(to_wallet_address, "", amount)
 
 @mcp.tool()
-async def transfer_token(to_account_address: str, token_address: str, amount: int, ctx: Context = None) -> str:
-    """transfer the token from account to the token_address with the amount"""
-    return beeper_client.transfer_asset(beeper_client.admin_wallet, beeper_client.admin_private, to_account_address, token_address, amount)
+async def transfer_token(to_wallet_address: str, token_address: str, amount: int, ctx: Context = None) -> str:
+    """transfer the token to the to_wallet_address with the amount"""
+    return beeper_client.transfer_asset(to_wallet_address, token_address, amount)
 
 
 async def main(address: str) -> None:
@@ -55,36 +55,36 @@ async def main(address: str) -> None:
         FunctionTool(
             get_bnb_balance,
             name="get_bnb_balance",
-            description="Get the bnb balance of the account",
+            description="Get the bnb balance of the wallet",
         ),
         FunctionTool(
             get_token_balance,
             name="get_token_balance",
-            description="Get the token balance of the account",
+            description="Get the token balance of the wallet",
         ),
         FunctionTool(
             trade_token,
             name="trade_token",
-            description="Trade the token from from_token_address to to_token_address with the amount",
+            description="Trade the token from input_token_address to output_token_address with the amount",
         ),
         FunctionTool(
             transfer_bnb,
             name="transfer_bnb",
-            description="Transfer the bnb from account to the to_account_address with the amount",
+            description="Transfer the bnb to the to_wallet_address with the amount",
         ),
         FunctionTool(
             transfer_token,
             name="transfer_token",
-            description="Transfer the token from account to the token_address with the amount",
+            description="Transfer the token to the to_wallet_address with the amount",
         ),
     ]
 
     desc = "This is a beeper agent that can make trade.\n"
-    desc += "You can get the bnb balance of the account\n"
-    desc += "You can get the token balance of the account\n"
-    desc += "You can trade the token from from_token_address to to_token_address with the amount\n"
-    desc += "You can transfer the bnb to the to_account_address with the amount\n"
-    desc += "you can transfer the token to the to_account_address with the amount\n"
+    desc += "You can get the bnb balance of the wallet\n"
+    desc += "You can get the token balance of the wallet\n"
+    desc += "You can trade the token from input_token_address to output_token_address with the amount\n"
+    desc += "You can transfer the bnb to the to_wallet_address with the amount\n"
+    desc += "you can transfer the token to the to_wallet_address with the amount\n"
     
     tool_agent = ToolAgentWrapper(
         name=os.getenv("MEMBASE_ID"),
