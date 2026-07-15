@@ -1,6 +1,6 @@
 # aip-servers
 
-Agent Interoperability Protocol Servers
+Agent Internet Protocol Servers
 
 
 ## Installation
